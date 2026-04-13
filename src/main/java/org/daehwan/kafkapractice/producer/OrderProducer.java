@@ -18,6 +18,6 @@ public class OrderProducer {
 
     public void sendOrder(Order order) {
         log.info("Producing order message: {}", order);
-        kafkaTemplate.send(TOPIC, order);
+        kafkaTemplate.send(TOPIC, order.getOrderId(), order);
     }
 }
