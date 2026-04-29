@@ -15,6 +15,7 @@ import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
 import org.springframework.kafka.support.serializer.JacksonJsonDeserializer;
 import org.springframework.kafka.support.serializer.JacksonJsonSerializer;
+import org.springframework.kafka.transaction.KafkaTransactionManager;
 import org.springframework.util.backoff.FixedBackOff;
 
 import java.util.HashMap;
@@ -31,7 +32,10 @@ public class KafkaConfig {
         config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
         config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JacksonJsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(config);
+
+        DefaultKafkaProducerFactory<String, Order> factory = new DefaultKafkaProducerFactory<>(config);
+        factory.setTransactionIdPrefix("order-tx-");
+        return factory;
     }
 
     @Bean
@@ -77,5 +81,9 @@ public class KafkaConfig {
                 .partitions(3)
                 .replicas(1)
                 .build();
+    }
+    @Bean
+    public KafkaTransactionManager<String, Order> kafkaTransactionManager() {
+        return new KafkaTransactionManager<>(producerFactory());
     }
 }

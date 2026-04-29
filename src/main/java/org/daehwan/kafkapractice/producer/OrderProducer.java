@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.daehwan.kafkapractice.dto.Order;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -16,8 +17,14 @@ public class OrderProducer {
 
     private static final String TOPIC = "order-topic";
 
+    @Transactional(transactionManager = "kafkaTransactionManager")
     public void sendOrder(Order order) {
         log.info("Producing order message: {}", order);
         kafkaTemplate.send(TOPIC, order.getOrderId(), order);
+
+        if (order.getOrderId().equals("8888")) {
+            throw new RuntimeException("트랜잭션 실패 테스트!");
+        }
     }
+
 }
